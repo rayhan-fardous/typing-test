@@ -77,4 +77,9 @@ Contributions are welcome!
 
 ---
 
+🪪 License
+This project is licensed under the [MIT License](https://github.com/rayhan-fardous/typing-test/LICENSE).
+
+---
+
 Made with ❤️ by [Rayhan Fardous](https://github.com/rayhan-fardous)
