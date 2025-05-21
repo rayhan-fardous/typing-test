@@ -77,7 +77,7 @@ Contributions are welcome!
 
 ---
 
-🪪 License
+## 🪪 License
 This project is licensed under the [MIT License](https://github.com/rayhan-fardous/typing-test?tab=MIT-1-ov-file).
 
 ---
