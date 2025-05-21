@@ -1,37 +1,3 @@
-const programmingWords = [
-  "algorithm", "array", "api", "argument", "async", "attribute", "backend", "binary", "boolean", "bug",
-  "build", "cache", "callback", "class", "client", "closure", "code", "compile", "component", "condition",
-  "constant", "constructor", "console", "continue", "control", "cron", "css", "database", "debug", "declare",
-  "default", "define", "deploy", "dependency", "destructor", "devops", "directive", "dom", "download", "dynamic",
-  "else", "emulator", "encode", "encryption", "enum", "environment", "error", "event", "exception", "execute",
-  "export", "expression", "extends", "false", "fetch", "field", "file", "filter", "finally", "float",
-  "for", "foreach", "fork", "framework", "function", "git", "global", "hash", "heap", "hook",
-  "html", "http", "if", "import", "index", "inheritance", "input", "insert", "instance", "integer",
-  "interface", "interpreter", "iterator", "java", "javascript", "json", "key", "keyword", "kotlin", "lambda",
-  "library", "link", "linux", "list", "load", "local", "loop", "main", "map", "memory",
-  "method", "middleware", "module", "mutable", "namespace", "node", "null", "object", "operator", "output",
-  "override", "package", "parameter", "parse", "patch", "php", "pointer", "polling", "port", "post",
-  "print", "private", "process", "promise", "property", "protocol", "proxy", "public", "push", "python",
-  "query", "queue", "random", "react", "recursion", "refactor", "regex", "register", "release", "render",
-  "repository", "request", "require", "response", "return", "route", "ruby", "runtime", "sanitize", "save",
-  "schedule", "scope", "script", "sdk", "search", "select", "serialize", "server", "service", "session",
-  "set", "shell", "singleton", "socket", "software", "sort", "source", "sql", "stack", "state",
-  "static", "storage", "stream", "string", "struct", "style", "submit", "super", "switch", "synchronize",
-  "syntax", "system", "tag", "task", "template", "terminal", "test", "thread", "throw", "token",
-  "tool", "transpile", "true", "try", "type", "typescript", "ui", "undefined", "uninstall", "unit",
-  "update", "upload", "url", "use", "user", "util", "utility", "validate", "var", "variable",
-  "vector", "version", "view", "virtual", "void", "wait", "warn", "web", "webpack", "while",
-  "window", "with", "worker", "wrapper", "write", "xml", "yaml", "yield", "zip", "access",
-  "acl", "active", "adapter", "admin", "agent", "aggregate", "alias", "allocate", "annotation", "anonymous",
-  "ansi", "append", "architecture", "arity", "ascii", "assert", "asyncio", "atomic", "audit", "authentication",
-  "authorization", "autosave", "avatar", "backend", "benchmark", "bitwise", "blob", "branch", "broadcast", "buffer",
-  "bus", "byte", "caching", "callback", "cascade", "chain", "checkpoint", "cipher", "circular", "cli",
-  "cluster", "coalesce", "commit", "compress", "concatenate", "concurrent", "configure", "connect", "console", "constraint",
-  "consume", "context", "contract", "convention", "convert", "coroutine", "crash", "cryptography", "cursor", "data",
-  "deadlock", "decode", "defer", "delegate", "delta", "deserialize", "diff", "directive", "dispatch", "dns",
-  "docker", "document", "dynamic", "eject", "elevate", "entry", "enum", "ephemeral", "epoch", "eventloop",
-  "failover", "fallback", "firewall", "flag", "flush", "fork", "fragment", "frontend", "garbage", "generate"
-];
 const simpleWords = [
   "apple", "book", "cat", "dog", "egg", "fish", "go", "hat", "ice", "jam",
   "kite", "lamp", "man", "nose", "open", "pen", "queen", "red", "sun", "top",
@@ -70,6 +36,14 @@ const timerElement = document.getElementById('timer');
 const tryAgainButton = document.getElementById('try-again');
 const finalScoreElement = document.getElementById('final-score');
 
+let totalTyped = '';
+let currentCharIndex = 0;
+let errors = 0;
+let longText = generateLongText();
+let timeLeft = 60;
+let timerInterval;
+let typingStarted = false;
+
 // Shuffle the words Array
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -81,10 +55,121 @@ function shuffleArray(array) {
 
 // Combine shuffled words into one long string with spaces
 function generateLongText() {
-    const shuffledWords = shuffleArray([...programmingWords]);
+    const shuffledWords = shuffleArray([...simpleWords]);
     return shuffledWords.join(' ');
 }
 
-let longText = generateLongText();
+// Start Countdown Timer
+function startTimer() {
+    if (!typingStarted) {
+        typingStarted = true;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = `Time Left: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                endTest();
+            }
+        }, 1000);
+    }
+}
+// End the test and dispaly the final score
+function endTest() {
+    timerElement.textContent = `Time's Up!`;
+    finalScoreElement.textContent = `Final WPM: ${calculateWPM()}`;
+    textContainer.style.display = 'none';
+    tryAgainButton.style.display = 'block';
+}
 
-textContainer.textContent = longText;
+// Calculate word-per-minute with error adjustment
+function calculateWPM() {
+    const wordsTyped = totalTyped.trim().split(/\s+/).length;
+    const baseWPM = Math.round((wordsTyped / 60) * 60);
+    const adjustedWPM = Math.max(baseWPM - errors, 0);
+    return adjustedWPM;
+}
+
+// Handle typing over the displayed text and score
+document.addEventListener('keydown', (e) => {
+    startTimer();
+
+    if(e.key === 'Backspace') {
+        if(totalTyped.length > 0) {
+            currentCharIndex = Math.max(currentCharIndex - 1, 0);
+            totalTyped = totalTyped.slice(0, -1);
+        }
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        totalTyped += e.key;
+        currentCharIndex ++;
+    }
+   
+    const textArray = longText.split('');
+    textContainer.innerText = '';
+
+    errors = 0;
+
+    for (let i = 0; i < textArray.length; i++) {
+        const span = document.createElement('span');
+
+        if (i < totalTyped.length) {
+            if (totalTyped[i] === textArray[i]) {
+                span.classList.add('correct');
+            } else {
+                span.classList.add('error');
+                errors++;
+            }
+        }
+        
+        span.textContent = textArray[i];
+        textContainer.appendChild(span);
+    }
+    
+    // Scroll the container only after 20 characters
+    if (totalTyped.length >= 20) {
+        const scrollAmount = (totalTyped.length - 20) * 14;
+        textContainer.scrollLeft = scrollAmount;
+    }
+});
+
+// Reset th Test
+function  resetTest() {
+    clearInterval(timerInterval);
+    timeLeft = 60;
+    timerElement.textContent = `Time Left: ${timeLeft}s`;
+    finalScoreElement.textContent = '';
+    textContainer.style.display = 'block';
+    tryAgainButton.style.display = 'none';
+    totalTyped = '';
+    typingStarted = false;
+    currentCharIndex = 0;
+    errors = 0;
+    textContainer.scrollLeft = 0;
+    longText = generateLongText();
+    init();
+}
+
+// Initialize the Test
+function init() {
+    if (isMobileDevice()) {
+        showMobileMessage();
+    } else {
+        textContainer.innerText = longText;
+        timerElement.textContent = `Time Left: ${timeLeft}s`;
+    }
+}
+
+// Try Again Button listener
+tryAgainButton.addEventListener('click', resetTest);
+
+// Detect if the device is Mobile
+function isMobileDevice() {
+    return /Mobi|Android/i.test(navigator.userAgent) || window.innerWidth < 800 ;
+}
+
+// Show message for Mobile users 
+function showMobileMessage() {
+    textContainer.textContent = 'This typing test is designed for desktop use only!';
+}
+
+// Startup
+init();
