@@ -22,6 +22,7 @@ This project is a lightweight typing test tool built using **HTML, CSS, and Java
 - ✅ Clean and distraction-free interface  
 - ✅ No external dependencies – pure HTML, CSS & JavaScript  
 - ✅ Works offline – no server needed
+- ✅ Dark mode toggle 
 
 ---
 
@@ -60,8 +61,7 @@ typing-test/
 
 - [ ] Add difficulty levels (easy/medium/hard)  
 - [ ] Include more random paragraphs  
-- [ ] Leaderboard or result history  
-- [ ] Dark mode toggle  
+- [ ] Leaderboard or result history   
  
 ---
 
